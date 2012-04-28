@@ -31,12 +31,12 @@ std::vector<Match> parse(std::string &s) {
 		char c = s.at(i);
 		if('(' == c) {
 			uint32_t set = 0;
+			c = s[++i];
+			while(c != ')') {
+				set |= (1 << (c - 'a'));
 				c = s[++i];
-				while(c != ')') {
-					set |= (1 << (c - 'a'));
-					c = s[++i];
-				}
-				matchers.push_back(Match(Opt, set));
+			}
+			matchers.push_back(Match(Opt, set));
 		} else {
 			matchers.push_back(Match(Lit, c));
 		}
