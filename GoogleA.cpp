@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <stdint.h>
 
 struct Match {
 	virtual bool matches(char c) = 0;
@@ -60,7 +61,7 @@ int main() {
 	int L, D, N;
 	std::cin >> L >> D >> N;
 	std::vector<std::string> Words;
-	std::vector<std::vector<Match*>> Patterns;
+	std::vector<std::vector<Match*> > Patterns;
 	for(int i = 0; i < D; ++i){
 		std::string line;
 		std::cin >> line;
@@ -72,9 +73,11 @@ int main() {
 		Patterns.push_back(parse(line));
 	}
 	int i = 1;
-	for(auto Pattern : Patterns) {
+	for(int p = 0; p < Patterns.size(); ++p) {
+		std::vector<Match*> Pattern = Patterns[p];
 		int matched = 0;
-		for(std::string Word : Words) {
+		for(int w = 0; w < Words.size(); ++w) {
+			std::string Word = Words[w];
 			if(matchesWord(Pattern, Word)) ++matched;
 		}
 		std::cout << "Case #" << i << ": " << matched << std::endl;
