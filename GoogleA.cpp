@@ -1,58 +1,53 @@
 #include <iostream>
-#include <algorithm>
 #include <vector>
 #include <stdint.h>
 
+enum Type {
+	Lit, Opt
+};
+
 struct Match {
-	virtual bool matches(char c) = 0;
-	virtual ~Match(){};
-};
-
-struct Literal : Match {
-	char C;
-	Literal(char C) : C(C) {}
-	virtual bool matches(char c) {
-		return c == C;
-	}
-};
-
-struct Option : Match {
-	uint32_t Set;
-	Option() : Set(0) {}
-
-	virtual bool matches(char c) {
-		return (Set & (1 << (c - 'a'))) != 0;
+	Type T;
+	union {
+		char c;
+		uint32_t set;
 	};
+	Match(Type Ty, char c) : T(Ty), c(c) {}
+	Match(Type Ty, uint32_t c) : T(Ty), set(c) {}
 
-	void set(char c) {
-		Set |= (1 << (c - 'a'));
+	bool matches(char ca) {
+		switch(T) {
+		case Lit: return c == ca;
+		case Opt: return (set & (1 << (ca - 'a'))) != 0;
+		}
 	}
 };
 
-std::vector<Match*> parse(std::string s) {
-	std::vector<Match*> matchers;
-	for(int i = 0; i < s.length(); i++) {
+std::vector<Match> parse(std::string &s) {
+	std::vector<Match> matchers;
+	int size = s.length();
+	matchers.reserve(size);
+	for(int i = 0; i < size; i++) {
 		char c = s.at(i);
-		switch(c) {
-			case '(': {
-				Option *O = new Option;
-				c = s.at(++i);
+		if('(' == c) {
+			uint32_t set = 0;
+				c = s[++i];
 				while(c != ')') {
-					O->set(c);
-					c = s.at(++i);
+					set |= (1 << (c - 'a'));
+					c = s[++i];
 				}
-				matchers.push_back(O);
-			}
-			break;
-			default: {matchers.push_back(new Literal(c));}
-		};
+				matchers.push_back(Match(Opt, set));
+		} else {
+			matchers.push_back(Match(Lit, c));
+		}
 	}
 	return matchers;
 }
 
-bool matchesWord(std::vector<Match*> M, std::string word) {
-	for(int i = 0; i < word.size(); ++i) {
-		if(!M[i]->matches(word[i])) return false;
+bool matchesWord(std::vector<Match> &M, std::string &word) {
+	int wsize = word.size();
+	for(int i = 0; i < wsize; ++i) {
+		if(!M[i].matches(word[i])) return false;
 	}
 	return true;
 }
@@ -61,26 +56,22 @@ int main() {
 	int L, D, N;
 	std::cin >> L >> D >> N;
 	std::vector<std::string> Words;
-	std::vector<std::vector<Match*> > Patterns;
+	Words.reserve(D);
+	std::string line;
 	for(int i = 0; i < D; ++i){
-		std::string line;
 		std::cin >> line;
 		Words.push_back(line);
 	}
-	for(int i = 0; i < N; ++i){
-		std::string line;
+	int casen = 0;
+	for(int i = 0; i < N; ++i) {
 		std::cin >> line;
-		Patterns.push_back(parse(line));
-	}
-	int i = 1;
-	for(int p = 0; p < Patterns.size(); ++p) {
-		std::vector<Match*> Pattern = Patterns[p];
-		int matched = 0;
-		for(int w = 0; w < Words.size(); ++w) {
-			std::string Word = Words[w];
-			if(matchesWord(Pattern, Word)) ++matched;
+    int matched = 0;
+		std::vector<Match> Pattern = parse(line);
+		int Ws = Words.size();
+		for(int w = 0; w < Ws; ++w) {
+			if(matchesWord(Pattern, Words[w])) ++matched;
 		}
-		std::cout << "Case #" << i << ": " << matched << std::endl;
-		++i;
+		++casen;
+    std::cout << "Case #" << casen << ": " << matched << '\n';
 	}
 }
