@@ -65,13 +65,13 @@ int main() {
 	int casen = 0;
 	for(int i = 0; i < N; ++i) {
 		std::cin >> line;
-    int matched = 0;
+		int matched = 0;
 		std::vector<Match> Pattern = parse(line);
 		int Ws = Words.size();
 		for(int w = 0; w < Ws; ++w) {
 			if(matchesWord(Pattern, Words[w])) ++matched;
 		}
 		++casen;
-    std::cout << "Case #" << casen << ": " << matched << '\n';
+		std::cout << "Case #" << casen << ": " << matched << '\n';
 	}
 }
