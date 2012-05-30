@@ -15,13 +15,13 @@
      (- 1 (* x x))))
 
 (define (find-smallest x)
-  (let lewp ((n x) (res '()))
+  (let lewp ((n x))
     (if (< n eps)
 	n
-	(lewp (/ n 2) (cons n res)))))
+	(lewp (/ n 2)))))
 
 
-(define (fuck-mgsk x)
+(define (tan-iter x)
   (let ((smallest (find-smallest x)))
     (let lewp ((start smallest) (current smallest))
       (if (>= current x)
